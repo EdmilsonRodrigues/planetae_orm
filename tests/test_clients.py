@@ -2,23 +2,23 @@ import os
 
 import mariadb
 import pymysql
-from src.planetae_db.client import (
-    MariaDBClient,
-    MongoDBClient,
-    MSSQLClient,
-    MySQLClient,
-    PostGresSQLClient,
-    SQLite3Client,
-)
 import pytest
 
+from src.planetae_db.client import (
+    MariaDBClient,
+    MySQLClient,
+)
 from src.planetae_db.database import Database
 
 
 @pytest.fixture()
 def mariadb_client():
     return MariaDBClient(
-        username="root", password="", host="localhost", port=3306, logger_file=os.path.join("tests", "test.log")
+        username="root",
+        password="",
+        host="localhost",
+        port=3306,
+        logger_file=os.path.join("tests", "test.log"),
     )
 
 
@@ -30,7 +30,11 @@ def xampp_mariadb_base_databases():
 @pytest.fixture()
 def mysql_client():
     return MySQLClient(
-        username="root", password="", host="localhost", port=3306, logger_file=os.path.join("tests", "test.log")
+        username="root",
+        password="",
+        host="localhost",
+        port=3306,
+        logger_file=os.path.join("tests", "test.log"),
     )
 
 
@@ -47,7 +51,9 @@ async def test_create_MariaDB_client(mariadb_client):
 
 @pytest.mark.mariadb
 @pytest.mark.asyncio()
-async def test_get_mariadb_database_names(mariadb_client, xampp_mariadb_base_databases):
+async def test_get_mariadb_database_names(
+    mariadb_client, xampp_mariadb_base_databases
+):
     databases = await mariadb_client.get_databases_names()
     assert databases is not None
     assert databases == xampp_mariadb_base_databases
@@ -85,7 +91,10 @@ async def test_fail_to_create_mariadb_database(mariadb_client, database_name):
 @pytest.mark.mariadb
 @pytest.mark.asyncio()
 async def test_do_not_create_mariadb_database(mariadb_client, database_name):
-    assert await mariadb_client.create_database(database_name, exist_ok=True) is False
+    assert (
+        await mariadb_client.create_database(database_name, exist_ok=True)
+        is False
+    )
     assert await mariadb_client.close()
 
 
@@ -105,7 +114,9 @@ async def test_create_mariadb_database(mariadb_client, database_name):
 
 @pytest.mark.mariadb
 @pytest.mark.asyncio()
-async def test_get_mariadb_database_names_2(mariadb_client, xampp_mariadb_base_databases):
+async def test_get_mariadb_database_names_2(
+    mariadb_client, xampp_mariadb_base_databases
+):
     databases = await mariadb_client.get_databases_names()
     assert databases is not None
     xampp_mariadb_base_databases.add("test")
@@ -140,7 +151,9 @@ async def test_delete_mariadb_database(mariadb_client, database_name):
 
 @pytest.mark.mariadb
 @pytest.mark.asyncio()
-async def test_synchronously_create_mariadb_database(mariadb_client, database_name):
+async def test_synchronously_create_mariadb_database(
+    mariadb_client, database_name
+):
     mariadb_client.automatically_create_database = True
     database = mariadb_client[database_name]
     assert database is not None
@@ -168,7 +181,9 @@ async def test_close_mariadb_client(mariadb_client):
 
 @pytest.mark.mariadb
 @pytest.mark.asyncio()
-async def test_integrated_mariadb_client_test(mariadb_client, database_name, xampp_mariadb_base_databases):
+async def test_integrated_mariadb_client_test(
+    mariadb_client, database_name, xampp_mariadb_base_databases
+):
     databases = await mariadb_client.get_databases_names()
     assert databases is not None
     assert databases == xampp_mariadb_base_databases
@@ -190,7 +205,9 @@ async def test_create_mysql_client(mysql_client):
 
 @pytest.mark.mysql
 @pytest.mark.asyncio()
-async def test_get_mysql_database_names(mysql_client, xampp_mariadb_base_databases):
+async def test_get_mysql_database_names(
+    mysql_client, xampp_mariadb_base_databases
+):
     databases = await mysql_client.get_databases_names()
     assert databases is not None
     assert databases == xampp_mariadb_base_databases
@@ -228,7 +245,10 @@ async def test_fail_to_create_mysql_database(mysql_client, database_name):
 @pytest.mark.mysql
 @pytest.mark.asyncio()
 async def test_do_not_create_mysql_database(mysql_client, database_name):
-    assert await mysql_client.create_database(database_name, exist_ok=True) is False
+    assert (
+        await mysql_client.create_database(database_name, exist_ok=True)
+        is False
+    )
     assert await mysql_client.close()
 
 
@@ -248,7 +268,9 @@ async def test_create_mysql_database(mysql_client, database_name):
 
 @pytest.mark.mysql
 @pytest.mark.asyncio()
-async def test_get_mysql_database_names_2(mysql_client, xampp_mariadb_base_databases):
+async def test_get_mysql_database_names_2(
+    mysql_client, xampp_mariadb_base_databases
+):
     databases = await mysql_client.get_databases_names()
     assert databases is not None
     xampp_mariadb_base_databases.add("test")
@@ -283,7 +305,9 @@ async def test_delete_mysql_database(mysql_client, database_name):
 
 @pytest.mark.mysql
 @pytest.mark.asyncio()
-async def test_synchronously_create_mysql_database(mysql_client, database_name):
+async def test_synchronously_create_mysql_database(
+    mysql_client, database_name
+):
     mysql_client.automatically_create_database = True
     database = mysql_client[database_name]
     assert database is not None
@@ -311,7 +335,9 @@ async def test_close_mysql_client(mysql_client):
 
 @pytest.mark.mysql
 @pytest.mark.asyncio()
-async def test_integrated_mysql_client_test(mysql_client, database_name, xampp_mariadb_base_databases):
+async def test_integrated_mysql_client_test(
+    mysql_client, database_name, xampp_mariadb_base_databases
+):
     databases = await mysql_client.get_databases_names()
     assert databases is not None
     assert databases == xampp_mariadb_base_databases

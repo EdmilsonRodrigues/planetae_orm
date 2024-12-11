@@ -163,5 +163,5 @@ async def test_restore_backup(initial_signature, backup_file_path):
 async def test_delete_database():
     assert await db.delete_database()
 
-    
+
 """

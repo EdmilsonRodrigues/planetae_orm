@@ -1,7 +1,9 @@
 class PlanetaeBaseException(Exception):
     message: str | None = None
 
-    def __init__(self, message: str | None = None, rewrite: bool = False) -> None:
+    def __init__(
+        self, message: str | None = None, rewrite: bool = False
+    ) -> None:
         if rewrite:
             msg = message
         else:

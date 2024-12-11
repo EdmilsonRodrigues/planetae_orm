@@ -1,12 +1,14 @@
 from abc import ABC, abstractmethod
-import asyncio
-import mysql.connector
+from collections.abc import AsyncGenerator
+from typing import Any
+
 import aiomysql
-import pymysql
-from src.planetae_db.database import Database
 import mariadb
-from typing import Any, AsyncGenerator
+import mysql.connector
+import pymysql
 from planetae_logger import Logger
+
+from src.planetae_db.database import Database
 
 
 class Client(ABC):
@@ -73,7 +75,7 @@ class Client(ABC):
         pass
 
     @abstractmethod
-    async def get_databases(self) -> AsyncGenerator[Database | None, None]:
+    async def get_databases(self) -> AsyncGenerator[Database | None]:
         yield
 
     @abstractmethod
@@ -95,7 +97,10 @@ class Client(ABC):
         def get_database_class_name(cls):
             return cls.__name__.replace("Client", "Database")
 
-        return getattr(import_module("src.planetae_db.database"), get_database_class_name(cls=cls))
+        return getattr(
+            import_module("src.planetae_db.database"),
+            get_database_class_name(cls=cls),
+        )
 
     async def close(self):
         if self.connection is None:
@@ -111,18 +116,26 @@ class SQLClient(Client):
     _sync_cursor: Any
 
     @abstractmethod
-    async def _execute(self, query: str, values: tuple | None = None, log: Any = None) -> bool:
+    async def _execute(
+        self, query: str, values: tuple | None = None, log: Any = None
+    ) -> bool:
         return self._execute_sync(query, values, log)
 
     @abstractmethod
-    async def _fetchone(self, query: str, values: tuple | None = None, log: Any = None) -> tuple:
+    async def _fetchone(
+        self, query: str, values: tuple | None = None, log: Any = None
+    ) -> tuple:
         pass
 
     @abstractmethod
-    async def _fetchall(self, query: str, values: tuple | None = None, log: Any = None) -> list[tuple]:
+    async def _fetchall(
+        self, query: str, values: tuple | None = None, log: Any = None
+    ) -> list[tuple]:
         pass
 
-    def _execute_sync(self, query: str, values: tuple | None = None, log: Any = None) -> bool:
+    def _execute_sync(
+        self, query: str, values: tuple | None = None, log: Any = None
+    ) -> bool:
         if log and self._logger:
             self._logger.info(log)
         try:
@@ -178,14 +191,19 @@ class SQLClient(Client):
                 return await self.get_database(name)
             raise
 
-    async def get_databases(self) -> AsyncGenerator[Database | None, None]:
+    async def get_databases(self) -> AsyncGenerator[Database | None]:
         databases = await self.get_databases_names()
         for database in databases:
             yield await self.get_database(database)
 
     async def get_databases_names(self) -> set:
         query = "SHOW DATABASES;"
-        return set(tup[0] for tup in await self._fetchall(query=query, log="Fetched all the tables of database."))
+        return set(
+            tup[0]
+            for tup in await self._fetchall(
+                query=query, log="Fetched all the tables of database."
+            )
+        )
 
     async def delete_database(self, name: str) -> bool:
         query = f"DROP DATABASE {name};"
@@ -196,8 +214,21 @@ class MariaDBClient(SQLClient):
     cursor: aiomysql.Cursor
     connection: aiomysql.Connection
 
-    def __init__(self, username: str, password: str, host: str, port: int, logger_file: str | None = None):
-        super().__init__(username=username, password=password, host=host, port=port, logger_file=logger_file)
+    def __init__(
+        self,
+        username: str,
+        password: str,
+        host: str,
+        port: int,
+        logger_file: str | None = None,
+    ):
+        super().__init__(
+            username=username,
+            password=password,
+            host=host,
+            port=port,
+            logger_file=logger_file,
+        )
         self.connection = None  # type: ignore
         self.cursor = None  # type: ignore
         self._sync_connection = mysql.connector.connect(
@@ -224,7 +255,9 @@ class MariaDBClient(SQLClient):
             port=self.port,
         )
 
-    async def _execute(self, query: str, values: tuple | None = None, log: Any = None) -> bool:
+    async def _execute(
+        self, query: str, values: tuple | None = None, log: Any = None
+    ) -> bool:
         self.connection = await self._create_connection()
         if log and self._logger:
             self._logger.info(log)
@@ -240,7 +273,9 @@ class MariaDBClient(SQLClient):
                 self._logger.debug(str(e))
             raise
 
-    async def _fetchone(self, query: str, values: tuple | None = None, log: Any = None) -> tuple:
+    async def _fetchone(
+        self, query: str, values: tuple | None = None, log: Any = None
+    ) -> tuple:
         self.connection = await self._create_connection()
         if log and self._logger:
             self._logger.info(log)
@@ -256,7 +291,9 @@ class MariaDBClient(SQLClient):
                 self._logger.debug(str(e))
             raise
 
-    async def _fetchall(self, query: str, values: tuple | None = None, log: Any = None) -> list[tuple]:
+    async def _fetchall(
+        self, query: str, values: tuple | None = None, log: Any = None
+    ) -> list[tuple]:
         self.connection = await self._create_connection()
         if log and self._logger:
             self._logger.info(log)
@@ -304,7 +341,9 @@ class MongoDBClient(NoSQLClient):
     cursor: Any
     connection: Any
 
-    async def _execute(self, query: str, values: tuple | None = None, log: Any = None) -> bool:
+    async def _execute(
+        self, query: str, values: tuple | None = None, log: Any = None
+    ) -> bool:
         if log and self._logger:
             self._logger.info(log)
         try:
@@ -317,7 +356,9 @@ class MongoDBClient(NoSQLClient):
             raise
 
     async def create_database(self, name: str, exist_ok: bool = True) -> bool:
-        return await self._execute(f"CREATE DATABASE {name} DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;")
+        return await self._execute(
+            f"CREATE DATABASE {name} DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+        )
 
     def _get_credentials(self) -> dict[str, str | int | None]:
         return {
@@ -333,14 +374,16 @@ class MongoDBClient(NoSQLClient):
             return None
         return Database(**self._get_credentials(), name=name)
 
-    async def get_databases(self) -> AsyncGenerator[Database | None, None]:
+    async def get_databases(self) -> AsyncGenerator[Database | None]:
         databases = await self.get_databases_names()
         for database in databases:
             yield await self.get_database(database)
 
     async def get_databases_names(self) -> tuple:
         query = "SHOW DATABASES;"
-        get = await self._execute(query=query, log="Fetched all the tables of database.")
+        get = await self._execute(
+            query=query, log="Fetched all the tables of database."
+        )
         if not get:
             return tuple()
         return self.cursor.fetchone()

@@ -1,7 +1,14 @@
 import subprocess
 import sys
 
-markers = ["mariadb", "mysql", "postgresql", "mssql", "sqlite3", "mongodb"]  # Corrected spelling
+markers = [
+    "mariadb",
+    "mysql",
+    "postgresql",
+    "mssql",
+    "sqlite3",
+    "mongodb",
+]  # Corrected spelling
 
 
 def test():
@@ -23,9 +30,23 @@ def test():
 
     print(include_markers)
 
-    print(["pytest", "tests", "-vvvv" + stop, "--cov", "--durations=5", include_markers])
+    print([
+        "pytest",
+        "tests",
+        "-vvvv" + stop,
+        "--cov",
+        "--durations=5",
+        include_markers,
+    ])
 
-    subprocess.run(["pytest", "tests", "-vvvv", "--cov", "--durations=5", include_markers])
+    subprocess.run([
+        "pytest",
+        "tests",
+        "-vvvv",
+        "--cov",
+        "--durations=5",
+        include_markers,
+    ])
 
 
 if __name__ == "__main__":
