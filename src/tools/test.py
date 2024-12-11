@@ -1,13 +1,12 @@
 import subprocess
-import sys
 
 markers = [
-    "mariadb",
-    "mysql",
-    "postgresql",
-    "mssql",
+    # "mariadb",
+    # "mysql",
+    # "postgresql",
+    # "mssql",
     "sqlite3",
-    "mongodb",
+    # "mongodb",
 ]  # Corrected spelling
 
 

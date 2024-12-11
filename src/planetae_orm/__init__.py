@@ -1,2 +1,1 @@
-def hello() -> str:
-    return "Hello from planetae-orm!"
+import planetar_orm.client
