@@ -3,23 +3,24 @@ name = "planetae-orm"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
+license = { file = "LICENSE" }
 authors = [
     { name = "Edmilson Monteiro Rodrigues Neto", email = "edmilson.rodriguesn38@gmail.com" }
 ]
 requires-python = ">=3.13"
 dependencies = [
-    "aiomysql==0.2.0",
-    "aioodbc==0.5.0",
-    "aiosqlite==0.20.0",
-    "asyncpg==0.30.0",
-    "mariadb==1.1.11",
-    "motor==3.6.0",
+    "aiomysql>=0.2.0",
+    "aioodbc>=0.5.0",
+    "aiosqlite>=0.20.0",
+    "asyncpg>=0.30.0",
+    "mariadb>=1.1.11",
+    "motor>=3.6.0",
 ]
 
 [project.scripts]
-lint = "tools.lint:lint_and_format"
-test = "tools.test:test"
-docs = "tools.docs:build"
+lint = "src.tools.lint:lint_and_format"
+test = "src.tools.test:test"
+docs = "src.tools.docs:build"
 
 [build-system]
 requires = ["hatchling"]
@@ -54,3 +55,11 @@ select = ["E", "F", "I", "UP"]
 docstring-code-format = true
 docstring-code-line-length = 72
 
+[tool.hatch.build.targets.wheel]
+include = ["src/planetae_orm/**"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src/planetae_orm/**"]
+
+[tool.hatch.metadata]
+root = "src"

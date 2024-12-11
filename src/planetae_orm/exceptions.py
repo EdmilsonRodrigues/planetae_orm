@@ -1,4 +1,4 @@
-class PlanetaeBaseException(Exception):
+class PlanetaeORMException(Exception):
     message: str | None = None
 
     def __init__(
@@ -21,5 +21,5 @@ class PlanetaeBaseException(Exception):
         return name.rstrip("exception").strip().capitalize()
 
 
-class CouldNotConnectWithDataPlanetaeBaseException(PlanetaeBaseException):
+class ClientException(PlanetaeORMException):
     pass

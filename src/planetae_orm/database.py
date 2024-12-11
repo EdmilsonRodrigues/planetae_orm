@@ -1,10 +1,7 @@
-from collections.abc import AsyncGenerator, Callable, Generator, Iterable
+from collections.abc import Callable, Generator, Iterable
 from typing import Any
 
 import mariadb
-from planetae_logger import Logger
-
-from src.planetae_db.table import Table
 
 
 class Database:
@@ -13,12 +10,10 @@ class Database:
     name: str
     host: str | None = None
     port: int | None = None
-    _tables: AsyncGenerator[Table | None] | None = None
     username: str | None = None
     password: str | None = None
     connection_string: str | None = None
     logger_file: str | None = None
-    _logger: Logger | None = None
 
     def __init__(
         self,

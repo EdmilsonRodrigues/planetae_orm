@@ -1,3 +1,8 @@
+from abc import abstractmethod
+from typing import Any
+from planetae_orm.client import Client
+
+
 class SQLClient(Client):
     cursor: Any
     connection: Any
@@ -24,29 +29,12 @@ class SQLClient(Client):
     def _execute_sync(
         self, query: str, values: tuple | None = None, log: Any = None
     ) -> bool:
-        if log and self._logger:
-            self._logger.info(log)
         try:
             if values:
                 self._sync_cursor.execute(query, values)
             self._sync_cursor.execute(query)
             return True
         except Exception as e:
-            if self._logger:
-                self._logger.debug(str(e))
-            raise
-
-    def __getitem__(self, item: str) -> Database:
-        try:
-            database = self._get_database_class()
-            return database(**self._get_credentials(), name=item)
-        except Exception:
-            if self.automatically_create_database:
-                self._execute_sync(
-                    f"CREATE DATABASE {item} DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;",
-                    log="Created database.",
-                )
-                return self[item]
             raise
 
     async def create_database(self, name: str, exist_ok: bool = True) -> bool:
@@ -96,5 +84,3 @@ class SQLClient(Client):
     async def delete_database(self, name: str) -> bool:
         query = f"DROP DATABASE {name};"
         return await self._execute(query, log=f"Dropped database {name}.")
-
-

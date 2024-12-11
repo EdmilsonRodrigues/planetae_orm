@@ -107,5 +107,3 @@ class MariaDBClient(SQLClient):
 
 class MySQLClient(MariaDBClient):
     pass
-
-
