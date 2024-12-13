@@ -3,11 +3,12 @@ from abc import ABC, abstractmethod
 from collections.abc import AsyncGenerator
 from typing import Any, Self
 
-from planetae_orm.database import Database
-from planetae_orm.exceptions import ClientException
+from models.database import Database
+from models.exceptions import ClientException
+from models.meta import AbstractMetaSingleton
 
 
-class AsyncIOPlanetaeBaseClient[D: Database](ABC):
+class AsyncIOPlanetaeClient[D: Database](ABC, metaclass=AbstractMetaSingleton):
     """Base class for all clients."""
 
     host: str | None = None
@@ -16,7 +17,11 @@ class AsyncIOPlanetaeBaseClient[D: Database](ABC):
     _connection: Any
     _cursor: Any
     _databases: set[str]
-    __iterating: bool = False
+    _iterating: bool = False
+
+    @abstractmethod
+    async def execute(self, query: str, values: tuple | None = None) -> bool:
+        pass
 
     def __init__(
         self,
@@ -28,7 +33,7 @@ class AsyncIOPlanetaeBaseClient[D: Database](ABC):
         self.port = port
         self._automatically_create_database = automatically_create_database
         self.__startup()
-        self.__iterating = False
+        self._iterating = False
 
     def __startup(self):
         try:
@@ -49,14 +54,14 @@ class AsyncIOPlanetaeBaseClient[D: Database](ABC):
         return self
 
     async def __anext__(self) -> D | None:
-        if not self.__iterating:
-            self.__iterating = True
+        if not self._iterating:
+            self._iterating = True
         try:
             database = self._databases.pop()
             return await self.get_database(database)
         except KeyError:
             self._databases = await self.get_databases_names()
-            self.__iterating = False
+            self._iterating = False
             raise StopAsyncIteration
 
     @abstractmethod
@@ -65,15 +70,15 @@ class AsyncIOPlanetaeBaseClient[D: Database](ABC):
             loop = asyncio.get_running_loop()
             db = loop.run_until_complete(self.get_database(item))
             if db is None:
-                raise ClientException(f"Database {item} does not exist.")
+                raise ClientException(f'Database {item} does not exist.')
             return db
         if self._automatically_create_database:
             loop = asyncio.get_running_loop()
             created = loop.run_until_complete(self.create_database(item))
             if not created:
-                raise ClientException(f"Database {item} could not be created.")
+                raise ClientException(f'Database {item} could not be created.')
             return self[item]
-        raise ClientException(f"Database {item} does not exist.")
+        raise ClientException(f'Database {item} does not exist.')
 
     @abstractmethod
     def __getattribute__(self, name: str) -> Any:
@@ -84,7 +89,8 @@ class AsyncIOPlanetaeBaseClient[D: Database](ABC):
 
     @abstractmethod
     async def create_database(self, name: str, exist_ok: bool = True) -> bool:
-        """Create a database. ## Should add the database to _databases."""
+        """Create a database."""
+        self._databases.add(name)
         pass
 
     @abstractmethod
@@ -101,7 +107,8 @@ class AsyncIOPlanetaeBaseClient[D: Database](ABC):
 
     @abstractmethod
     def delete_database(self, name: str) -> bool:
-        """Delete a database. ## Should remove the database from _databases."""
+        """Delete a database."""
+        self._databases.remove(name)
         pass
 
     @classmethod
@@ -109,10 +116,10 @@ class AsyncIOPlanetaeBaseClient[D: Database](ABC):
         from importlib import import_module
 
         def get_database_class_name(cls: type[Self]) -> str:
-            return cls.__name__.replace("Client", "Database")
+            return cls.__name__.replace('Client', 'Database')
 
         return getattr(
-            import_module("src.planetae_db.database"),
+            import_module('src.planetae_db.database'),
             get_database_class_name(cls=cls),
         )
 

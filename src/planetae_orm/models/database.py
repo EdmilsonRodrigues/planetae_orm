@@ -1,19 +1,19 @@
 from enum import Enum
-
-from planetae_orm.clients.base import BaseClient
+from functools import cache
 
 
 class PossibleClients(Enum):
-    MYSQL = "mysql"
-    MARIADB = "mariadb"
-    POSTGRESQL = "postgresql"
-    MSSQL = "mssql"
-    SQLITE3 = "sqlite3"
-    MONGODB = "mongodb"
+    MYSQL = 'mysql'
+    MARIADB = 'mariadb'
+    POSTGRESQL = 'postgresql'
+    MSSQL = 'mssql'
+    SQLITE3 = 'sqlite3'
+    MONGODB = 'mongodb'
 
 
-class Client[C: BaseClient]:
-    def __new__(cls, name: str | PossibleClients) -> C:
+@cache
+class Database[D: AsyncIOPlanetaeClient]:
+    def __new__(cls, name: str | PossibleClients) -> D:
         if isinstance(name, str):
             name = PossibleClients(name.lower())
         match name:
@@ -38,4 +38,4 @@ class Client[C: BaseClient]:
             #     from planetae_orm.clients.mongodb import MongoDBClient
             #     return MongoDBClient
             case _:
-                raise ValueError(f"Client {name} not supported")
+                raise ValueError(f'Client {name} not supported')

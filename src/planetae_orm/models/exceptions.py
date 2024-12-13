@@ -7,18 +7,18 @@ class PlanetaeORMException(Exception):
         if rewrite:
             msg = message
         else:
-            msg = self.name() + ": " + message if message else self.name()
+            msg = self.name() + ': ' + message if message else self.name()
         super().__init__(msg)
 
     @classmethod
     def name(cls):
-        name = ""
+        name = ''
         for character in cls.__name__:
             if character.isupper():
-                name += " " + character.lower()
+                name += ' ' + character.lower()
             else:
                 name += character
-        return name.rstrip("exception").strip().capitalize()
+        return name.rstrip('exception').strip().capitalize()
 
 
 class ClientException(PlanetaeORMException):
