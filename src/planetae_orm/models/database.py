@@ -12,7 +12,7 @@ class PossibleClients(Enum):
 
 
 @cache
-class Database[D: AsyncIOPlanetaeClient]:
+class Database[D: AsyncIOPlanetaeDatabase]:
     def __new__(cls, name: str | PossibleClients) -> D:
         if isinstance(name, str):
             name = PossibleClients(name.lower())

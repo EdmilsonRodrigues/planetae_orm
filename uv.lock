@@ -329,6 +329,7 @@ dependencies = [
 [package.dev-dependencies]
 dev = [
     { name = "mypy" },
+    { name = "planetae-orm" },
     { name = "ruff" },
 ]
 docs = [
@@ -353,6 +354,7 @@ requires-dist = [
 [package.metadata.requires-dev]
 dev = [
     { name = "mypy", specifier = ">=1.13.0" },
+    { name = "planetae-orm", editable = "." },
     { name = "ruff", specifier = ">=0.8.2" },
 ]
 docs = [

@@ -1,4 +1,4 @@
-class Database:
+class DatabaseAsyncIOPlanetaeClient:
     cursor: Any
     connection: Any
     name: str

@@ -19,6 +19,7 @@ dependencies = [
 [dependency-groups]
 dev = [
     "mypy>=1.13.0",
+    "planetae-orm",
     "ruff>=0.8.2",
 ]
 tests = [
@@ -38,6 +39,9 @@ docs = "tools.docs:build"
 
 [tool.uv.workspace]
 members = ["."]
+
+[tool.uv.sources]
+planetae-orm = { workspace = true }
 
 
 [tool.pytest.ini_options]

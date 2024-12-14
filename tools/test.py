@@ -14,7 +14,7 @@ def test():
     subprocess.run(
         [
             'pytest',
-            '-vvvx',
+            '-vvv',
             '--cov=src/planetae_orm',
             '--cov-report=term-missing',
         ],

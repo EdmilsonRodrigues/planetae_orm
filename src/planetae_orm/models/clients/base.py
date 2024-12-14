@@ -3,12 +3,14 @@ from abc import ABC, abstractmethod
 from collections.abc import AsyncGenerator
 from typing import Any, Self
 
-from models.database import Database
-from models.exceptions import ClientException
-from models.meta import AbstractMetaSingleton
+from planetae_orm.models.databases.base import DatabaseAsyncIOPlanetaeClient
+from planetae_orm.models.exceptions import ClientException
+from planetae_orm.models.meta import AbstractMetaSingleton
 
 
-class AsyncIOPlanetaeClient[D: Database](ABC, metaclass=AbstractMetaSingleton):
+class AsyncIOPlanetaeClient[D: DatabaseAsyncIOPlanetaeClient](
+    ABC, metaclass=AbstractMetaSingleton
+):
     """Base class for all clients."""
 
     host: str | None = None
@@ -106,7 +108,7 @@ class AsyncIOPlanetaeClient[D: Database](ABC, metaclass=AbstractMetaSingleton):
         pass
 
     @abstractmethod
-    def delete_database(self, name: str) -> bool:
+    async def delete_database(self, name: str) -> bool:
         """Delete a database."""
         self._databases.remove(name)
         pass
