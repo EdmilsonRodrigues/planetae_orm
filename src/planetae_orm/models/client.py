@@ -1,7 +1,7 @@
 from enum import Enum
 from functools import cache
 
-from planetae_orm.models.clients.base import AsyncIOPlanetaeClient
+from src.planetae_orm.models.clients.base import AsyncIOPlanetaeClient
 
 
 class PossibleClients(Enum):
@@ -14,19 +14,25 @@ class PossibleClients(Enum):
 
 
 @cache
-class Client[C: AsyncIOPlanetaeClient]:
-    def __new__(cls, name: str | PossibleClients) -> C:
+class Client:
+    def __new__(
+        cls, name: str | PossibleClients
+    ) -> type[AsyncIOPlanetaeClient]:
         if isinstance(name, str):
             name = PossibleClients(name.lower())
         match name:
             case PossibleClients.MYSQL:
-                from planetae_orm.clients.mariadb import MySQLClient
+                from src.planetae_orm.models.clients.mariadb import (
+                    AsyncIOMySQLClient,
+                )
 
-                return MySQLClient
+                return AsyncIOMySQLClient
             case PossibleClients.MARIADB:
-                from planetae_orm.clients.mariadb import MariaDBClient
+                from src.planetae_orm.models.clients.mariadb import (
+                    AsyncIOMariaDBClient,
+                )
 
-                return MariaDBClient
+                return AsyncIOMariaDBClient
             # case PossibleClients.POSTGRESQL:
             #     from planetae_orm.clients.postgresql import PostgreSQLClient
             #     return PostgreSQLClient

@@ -1,9 +1,8 @@
-from collections.abc import Generator
-from typing import Any
+class AsyncIOPlanetaeDatabase:
+    pass
 
 
-class DatabaseAsyncIOPlanetaeClient:
-    cursor: Any
+"""    cursor: Any
     connection: Any
     name: str
     host: str | None = None
@@ -141,3 +140,4 @@ class DatabaseAsyncIOPlanetaeClient:
 
     async def delete_database(self) -> bool:
         return self.not_implemented()
+"""

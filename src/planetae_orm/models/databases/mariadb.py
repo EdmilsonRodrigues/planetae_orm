@@ -1,5 +1,12 @@
-class AsyncIOMariaDBDatabase(SQLDatabase):
-    def __init__(
+from src.planetae_orm.models.databases.sql import AsyncIOSQLDatabase
+
+
+class AsyncIOMariaDBDatabase(AsyncIOSQLDatabase):
+    def __init__(self) -> None:
+        super().__init__()
+
+
+"""    def __init__(
         self,
         name: str,
         host: str,
@@ -24,7 +31,8 @@ class AsyncIOMariaDBDatabase(SQLDatabase):
             database=self.name,
         )
         self.cursor = self.connection.cursor()
+"""
 
 
-class MySQLDatabase(MariaDBDatabase):
+class AsyncioMySQLDatabase(AsyncIOMariaDBDatabase):
     pass

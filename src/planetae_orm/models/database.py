@@ -1,6 +1,8 @@
 from enum import Enum
 from functools import cache
 
+from src.planetae_orm.models.databases.base import AsyncIOPlanetaeDatabase
+
 
 class PossibleClients(Enum):
     MYSQL = 'mysql'

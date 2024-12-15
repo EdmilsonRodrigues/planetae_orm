@@ -4,13 +4,13 @@ from collections.abc import AsyncGenerator
 from typing import Any, Self
 
 from src.planetae_orm.models.databases.base import (
-    DatabaseAsyncIOPlanetaeClient,
+    AsyncIOPlanetaeDatabase,
 )
 from src.planetae_orm.models.exceptions import ClientException
 from src.planetae_orm.models.meta import AbstractMetaSingleton
 
 
-class AsyncIOPlanetaeClient[D: DatabaseAsyncIOPlanetaeClient](
+class AsyncIOPlanetaeClient[D: AsyncIOPlanetaeDatabase](
     ABC, metaclass=AbstractMetaSingleton
 ):
     """Base class for all clients."""
@@ -21,9 +21,9 @@ class AsyncIOPlanetaeClient[D: DatabaseAsyncIOPlanetaeClient](
     _databases: set[str]
     _iterating: bool = False
 
-    @abstractmethod
-    async def execute(self, query: str, values: tuple | None = None) -> bool:
-        pass
+    @property
+    def automatically_create_database(self) -> bool:
+        return self._automatically_create_database
 
     def __init__(
         self,
@@ -48,10 +48,6 @@ class AsyncIOPlanetaeClient[D: DatabaseAsyncIOPlanetaeClient](
     async def __async_startup(self):
         self._databases = await self.get_databases_names()
 
-    @property
-    def automatically_create_database(self) -> bool:
-        return self._automatically_create_database
-
     def __aiter__(self):
         return self
 
@@ -72,14 +68,6 @@ class AsyncIOPlanetaeClient[D: DatabaseAsyncIOPlanetaeClient](
 
     async def __aexit__(self, exc_type, exc_value, traceback):
         await self.close()
-
-    @abstractmethod
-    async def open(self) -> bool:
-        pass
-
-    @abstractmethod
-    async def close(self) -> bool:
-        pass
 
     @abstractmethod
     def __getitem__(self, item: str) -> D:
@@ -103,6 +91,29 @@ class AsyncIOPlanetaeClient[D: DatabaseAsyncIOPlanetaeClient](
             return self[name]
 
     @abstractmethod
+    async def execute(self, query: str, values: tuple | None = None) -> bool:
+        """
+        Execute a query in the database.
+
+        :param query: The query to execute
+        :type query: str
+        :param values: The values to pass to the query
+        :type values: tuple
+
+        :return: True if the query was executed successfully
+        :rtype: bool
+        """
+        pass
+
+    @abstractmethod
+    async def open(self) -> bool:
+        pass
+
+    @abstractmethod
+    async def close(self) -> bool:
+        pass
+
+    @abstractmethod
     async def create_database(self, name: str, exist_ok: bool = True) -> bool:
         """Create a database."""
         self._databases.add(name)
@@ -124,6 +135,16 @@ class AsyncIOPlanetaeClient[D: DatabaseAsyncIOPlanetaeClient](
     async def delete_database(self, name: str) -> bool:
         """Delete a database."""
         self._databases.remove(name)
+        pass
+
+    @abstractmethod
+    async def fetchone(self, query: str, values: tuple | None = None) -> tuple:
+        pass
+
+    @abstractmethod
+    async def fetchall(
+        self, query: str, values: tuple | None = None
+    ) -> list[tuple]:
         pass
 
     @classmethod
