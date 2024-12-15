@@ -1,3 +1,7 @@
+from collections.abc import Generator
+from typing import Any
+
+
 class DatabaseAsyncIOPlanetaeClient:
     cursor: Any
     connection: Any

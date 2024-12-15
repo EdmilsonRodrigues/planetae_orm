@@ -1,4 +1,4 @@
-class MariaDBDatabase(SQLDatabase):
+class AsyncIOMariaDBDatabase(SQLDatabase):
     def __init__(
         self,
         name: str,

@@ -1,67 +1,37 @@
 from abc import abstractmethod
-from typing import Any
+from collections.abc import AsyncGenerator
 
-from planetae_orm.models.clients.base import AsyncIOPlanetaeClient
+from src.planetae_orm.models.clients.base import AsyncIOPlanetaeClient
+from src.planetae_orm.models.databases.sql import AsyncIOSQLDatabase
 
 
-class AsyncIOSQLClient(AsyncIOPlanetaeClient):
-    def __init__(self):
+class AsyncIOSQLClient[D: AsyncIOSQLDatabase](AsyncIOPlanetaeClient):
+    async def execute(self, query: str, values: tuple | None = None) -> bool:
+        async with self:
+            if values:
+                await self.cursor.execute(query, values)
+            else:
+                await self.cursor.execute(query)
+        return True
+
+    @abstractmethod
+    async def fetchone(self, query: str, values: tuple | None = None) -> tuple:
         pass
 
     @abstractmethod
-    async def _fetchone(
-        self, query: str, values: tuple | None = None, log: Any = None
-    ) -> tuple:
-        pass
-
-    @abstractmethod
-    async def _fetchall(
-        self, query: str, values: tuple | None = None, log: Any = None
+    async def fetchall(
+        self, query: str, values: tuple | None = None
     ) -> list[tuple]:
         pass
 
-    async def create_database(self, name: str, exist_ok: bool = True) -> bool:
-        try:
-            return await self.execute(
-                ' '.join((
-                    f'CREATE DATABASE {name} DEFAULT CHARACTER SET',
-                    'utf8mb4 COLLATE utf8mb4_unicode_ci;',
-                ))
-            )
-        except Exception as e:
-            self._handle_create_database_exception(e, exist_ok)
-
-    @abstractmethod
-    def _handle_create_database_exception(
-        self, exception: Exception, exist_ok: bool
-    ):
-        if not exist_ok:
-            raise exception
-
-    async def get_database(self, name: str):
-        try:
-            database = self._get_database_class()
-            return database(**self._get_credentials(), name=name)
-        except mariadb.ProgrammingError:
-            if self.automatically_create_database:
-                await self.create_database(name)
-                return await self.get_database(name)
-            raise
-
-    async def get_databases(self) -> AsyncGenerator[Database | None]:
-        databases = await self.get_databases_names()
-        for database in databases:
+    async def get_databases(self) -> AsyncGenerator[D | None]:
+        for database in await self.get_databases_names():
             yield await self.get_database(database)
 
     async def get_databases_names(self) -> set:
         query = 'SHOW DATABASES;'
-        return set(
-            tup[0]
-            for tup in await self._fetchall(
-                query=query, log='Fetched all the tables of database.'
-            )
-        )
+        return set(tup[0] for tup in await self.fetchall(query=query))
 
     async def delete_database(self, name: str) -> bool:
         query = f'DROP DATABASE {name};'
-        return await self._execute(query, log=f'Dropped database {name}.')
+        return await self.execute(query)

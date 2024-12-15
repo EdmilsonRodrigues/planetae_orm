@@ -1,4 +1,4 @@
-class SQLDatabase(Database):
+class AsyncIOSQLDatabase(Database):
     db: mariadb.Connection
     cursor: mariadb.Cursor
 

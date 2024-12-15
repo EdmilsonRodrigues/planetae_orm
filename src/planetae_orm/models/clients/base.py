@@ -3,9 +3,11 @@ from abc import ABC, abstractmethod
 from collections.abc import AsyncGenerator
 from typing import Any, Self
 
-from planetae_orm.models.databases.base import DatabaseAsyncIOPlanetaeClient
-from planetae_orm.models.exceptions import ClientException
-from planetae_orm.models.meta import AbstractMetaSingleton
+from src.planetae_orm.models.databases.base import (
+    DatabaseAsyncIOPlanetaeClient,
+)
+from src.planetae_orm.models.exceptions import ClientException
+from src.planetae_orm.models.meta import AbstractMetaSingleton
 
 
 class AsyncIOPlanetaeClient[D: DatabaseAsyncIOPlanetaeClient](
@@ -13,11 +15,9 @@ class AsyncIOPlanetaeClient[D: DatabaseAsyncIOPlanetaeClient](
 ):
     """Base class for all clients."""
 
-    host: str | None = None
-    port: int | None = None
+    host: str
+    port: int
     _automatically_create_database: bool = False
-    _connection: Any
-    _cursor: Any
     _databases: set[str]
     _iterating: bool = False
 
@@ -27,12 +27,12 @@ class AsyncIOPlanetaeClient[D: DatabaseAsyncIOPlanetaeClient](
 
     def __init__(
         self,
-        host: str | None = None,
-        port: int | None = None,
-        automatically_create_database: bool = False,
+        host: str,
+        port: int,
+        automatically_create_database: bool = True,
     ):
-        self.host = host
-        self.port = port
+        self._host = host
+        self._port = port
         self._automatically_create_database = automatically_create_database
         self.__startup()
         self._iterating = False
@@ -66,18 +66,31 @@ class AsyncIOPlanetaeClient[D: DatabaseAsyncIOPlanetaeClient](
             self._iterating = False
             raise StopAsyncIteration
 
+    async def __aenter__(self):
+        await self.open()
+        return self
+
+    async def __aexit__(self, exc_type, exc_value, traceback):
+        await self.close()
+
+    @abstractmethod
+    async def open(self) -> bool:
+        pass
+
+    @abstractmethod
+    async def close(self) -> bool:
+        pass
+
     @abstractmethod
     def __getitem__(self, item: str) -> D:
+        loop = asyncio.get_running_loop()
         if item in self._databases:
-            loop = asyncio.get_running_loop()
             db = loop.run_until_complete(self.get_database(item))
             if db is None:
                 raise ClientException(f'Database {item} does not exist.')
             return db
         if self._automatically_create_database:
-            loop = asyncio.get_running_loop()
-            created = loop.run_until_complete(self.create_database(item))
-            if not created:
+            if not loop.run_until_complete(self.create_database(item)):
                 raise ClientException(f'Database {item} could not be created.')
             return self[item]
         raise ClientException(f'Database {item} does not exist.')
@@ -121,13 +134,6 @@ class AsyncIOPlanetaeClient[D: DatabaseAsyncIOPlanetaeClient](
             return cls.__name__.replace('Client', 'Database')
 
         return getattr(
-            import_module('src.planetae_db.database'),
+            import_module(__name__.replace('clients', 'databases')),
             get_database_class_name(cls=cls),
         )
-
-    async def close(self) -> bool:
-        if self.connection is None:
-            return True
-        self.connection.close()
-        self.connection = None
-        return True
