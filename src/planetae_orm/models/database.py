@@ -1,42 +1,37 @@
-from enum import Enum
 from functools import cache
 
+from planetae_orm.models.client import SupportedClients
 from src.planetae_orm.models.databases.base import AsyncIOPlanetaeDatabase
-
-
-class PossibleClients(Enum):
-    MYSQL = 'mysql'
-    MARIADB = 'mariadb'
-    POSTGRESQL = 'postgresql'
-    MSSQL = 'mssql'
-    SQLITE3 = 'sqlite3'
-    MONGODB = 'mongodb'
 
 
 @cache
 class Database[D: AsyncIOPlanetaeDatabase]:
-    def __new__(cls, name: str | PossibleClients) -> D:
+    def __new__(cls, name: str | SupportedClients) -> D:
         if isinstance(name, str):
-            name = PossibleClients(name.lower())
+            name = SupportedClients(name.lower())
         match name:
-            case PossibleClients.MYSQL:
-                from planetae_orm.clients.mariadb import MySQLClient
+            case SupportedClients.MYSQL:
+                from src.planetae_orm.models.clients.mariadb import (
+                    AsyncIOMySQLClient,
+                )
 
-                return MySQLClient
-            case PossibleClients.MARIADB:
-                from planetae_orm.clients.mariadb import MariaDBClient
+                return AsyncIOMySQLClient
+            case SupportedClients.MARIADB:
+                from src.planetae_orm.models.clients.mariadb import (
+                    AsyncIOMariaDBClient,
+                )
 
-                return MariaDBClient
-            # case PossibleClients.POSTGRESQL:
+                return AsyncIOMariaDBClient
+            # case SupportedClients.POSTGRESQL:
             #     from planetae_orm.clients.postgresql import PostgreSQLClient
             #     return PostgreSQLClient
-            # case PossibleClients.MSSQL:
+            # case SupportedClients.MSSQL:
             #     from planetae_orm.clients.mssql import MSSQLClient
             #     return MSSQLClient
-            # case PossibleClients.SQLITE3:
+            # case SupportedClients.SQLITE3:
             #     from planetae_orm.clients.sqlite3 import SQLite3Client
             #     return SQLite3Client
-            # case PossibleClients.MONGODB:
+            # case SupportedClients.MONGODB:
             #     from planetae_orm.clients.mongodb import MongoDBClient
             #     return MongoDBClient
             case _:

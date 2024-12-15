@@ -1,7 +1,7 @@
 [project]
 name = "planetae-orm"
 version = "0.1.0"
-description = "Add your description here"
+description = "An ORM meaning to integrate seamlessly in the most direct way, asynchronous database calls for different databases with the same commands"
 readme = "README.md"
 license = { file = "LICENSE" }
 authors = [
@@ -60,6 +60,11 @@ preview = true
 quote-style = 'single'
 docstring-code-format = true
 docstring-code-line-length = 72
+
+
+[tool.mypy]
+python_version="3.13"
+disable_error_code = ["misc"]
 
 
 [build-system]

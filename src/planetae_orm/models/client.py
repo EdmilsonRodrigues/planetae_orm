@@ -4,45 +4,45 @@ from functools import cache
 from src.planetae_orm.models.clients.base import AsyncIOPlanetaeClient
 
 
-class PossibleClients(Enum):
+class SupportedClients(Enum):
     MYSQL = 'mysql'
     MARIADB = 'mariadb'
-    POSTGRESQL = 'postgresql'
-    MSSQL = 'mssql'
-    SQLITE3 = 'sqlite3'
-    MONGODB = 'mongodb'
+    # POSTGRESQL = 'postgresql'
+    # MSSQL = 'mssql'
+    # SQLITE3 = 'sqlite3'
+    # MONGODB = 'mongodb'
 
 
 @cache
 class Client:
     def __new__(
-        cls, name: str | PossibleClients
+        cls, name: str | SupportedClients
     ) -> type[AsyncIOPlanetaeClient]:
         if isinstance(name, str):
-            name = PossibleClients(name.lower())
+            name = SupportedClients(name.lower())
         match name:
-            case PossibleClients.MYSQL:
+            case SupportedClients.MYSQL:
                 from src.planetae_orm.models.clients.mariadb import (
                     AsyncIOMySQLClient,
                 )
 
                 return AsyncIOMySQLClient
-            case PossibleClients.MARIADB:
+            case SupportedClients.MARIADB:
                 from src.planetae_orm.models.clients.mariadb import (
                     AsyncIOMariaDBClient,
                 )
 
                 return AsyncIOMariaDBClient
-            # case PossibleClients.POSTGRESQL:
+            # case SupportedClients.POSTGRESQL:
             #     from planetae_orm.clients.postgresql import PostgreSQLClient
             #     return PostgreSQLClient
-            # case PossibleClients.MSSQL:
+            # case SupportedClients.MSSQL:
             #     from planetae_orm.clients.mssql import MSSQLClient
             #     return MSSQLClient
-            # case PossibleClients.SQLITE3:
+            # case SupportedClients.SQLITE3:
             #     from planetae_orm.clients.sqlite3 import SQLite3Client
             #     return SQLite3Client
-            # case PossibleClients.MONGODB:
+            # case SupportedClients.MONGODB:
             #     from planetae_orm.clients.mongodb import MongoDBClient
             #     return MongoDBClient
             case _:
