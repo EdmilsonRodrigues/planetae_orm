@@ -2,12 +2,12 @@ import asyncio
 
 import aiomysql
 
+from src.planetae_orm.models.clients.sql import AsyncIOSQLClient
 from src.planetae_orm.models.databases.mariadb import (
     AsyncIOMariaDBDatabase,
     AsyncioMySQLDatabase,
 )
 from src.planetae_orm.models.exceptions import ClientException
-from src.planetae_orm.models.clients.sql import AsyncIOSQLClient
 
 
 class AsyncIOMariaDBClient[D = AsyncIOMariaDBDatabase](AsyncIOSQLClient):
